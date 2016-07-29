@@ -7,7 +7,7 @@ title: 小宝的技术锅
 subtitle: 为了奥拓列夫的荣耀
 description:
 author: Niko Vinci
-language:
+language: zh-Hans
 timezone:
 
 # URL
@@ -63,7 +63,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
