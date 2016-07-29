@@ -72,3 +72,5 @@ deploy:
   repo: https://github.com/x4niko/autoref.git
   branch: master
   message: autoref deploy
+
+baidu_analytics: 63c79e1776a1bfa83cb00d24fcebd0df
