@@ -1,0 +1,211 @@
+---
+title: Android网络通信框架Volley解析1：基本网络通信请求
+tags:
+  - android
+  - volley
+  - 框架
+  - 网络通信
+id: 204
+categories:
+  - android
+  - android应用开发
+date: 2016-01-08 23:51:03
+---
+
+Volley是Google在2013年I/O大会上推出的一个新的网络通信框架，使用简单、代码轻量、通信速度快、并发量大，非常适合数据量不大，但通信频繁的网络操作，Volley不适合用于大数据量的网络操作，比如说下载文件等。
+&nbsp;
+初始化请求队列
+<pre>RequestQueue mRequestQueue = Volley.newRequestQueue(context);
+</pre>
+RequestQueue是一个请求队列对象，可以缓存所有的HTTP请求，不必为每一次HTTP请求都创建一个RequestQueue对象，一般习惯用法是在Application中全局初始化。
+&nbsp;
+ObjectRequest需要根据自己请求返回的数据来定制，继承抽象类Request，Vollay已经实现了StringRequest、JsonArrayRequest、JsonObjectRequest、ImageRequest请求。
+&nbsp;
+StringRequest：通过URL请求，并获取字符串响应体。请求类型通常有GET和POST两种，默认为GET。
+<pre>
+StringRequest stringRequest = new StringRequest("www.autoref.cn",
+      new Response.Listener<String>() {
+           @Override
+           public void onResponse(String response) {
+               Log.d("TAG", response);
+           }
+      }, new Response.ErrorListener() {
+           @Override
+           public void onErrorResponse(VolleyError error) {
+               Log.e("TAG", error.getMessage());
+           }
+      });
+// 将StringRequest对象添加到RequestQueue里
+requestQueue.add(stringRequest);
+</pre>
+StringRequest中还提供了另外一种四个参数的构造函数，其中第一个参数就是指定请求类型的，但是StringRequest中并没有提供设置POST参数的方法，我们可以通过StringRequest的父类Request中的getParams()方法来获取POST参数，只需要在StringRequest的匿名类中重写getParams()方法设置POST参数：
+<pre>
+StringRequest stringRequest = new StringRequest(Request.Method.POST, url, listener, errorListener) {
+      @Override
+      protected Map<String, String> getParams() throws AuthFailureError {
+           Map<String, String> map = new HashMap<String, String>();
+           map.put("params1", "value1");
+           map.put("params2", "value2");
+           return map;
+      }
+};
+</pre>
+另外我们可以重写parseNetworkResponse方法来改变返回的头参数
+<pre>
+StringRequest stringRequest = new StringRequest(Request.Method.GET, url, listener, errorListener) {
+      protected final String TYPE_UTF8_CHARSET = "charset=UTF-8";
+
+      @Override
+      protected Response<String> parseNetworkResponse(NetworkResponse response) {
+           try {
+               // 如果编码不是UTF-8的话就转换，解决乱码问题
+               String type = response.headers.get(HTTP.CONTENT_TYPE);
+               if (type == null) {
+                   type = TYPE_UTF8_CHARSET;
+                   response.headers.put(HTTP.CONTENT_TYPE, type);
+               } else if (!type.contains("UTF-8")) {
+                   type += ";" + TYPE_UTF8_CHARSET;
+                   response.headers.put(HTTP.CONTENT_TYPE, type);
+               }
+           } catch (Exception e) {}
+           return super.parseNetworkResponse(response);
+      }
+};
+</pre>
+&nbsp;
+JsonRequest：JsonRequest也继承自Request类的，不过JsonRequest是一个抽象类，JsonRequest有两个直接的子类，JsonObjectRequest和JsonArrayRequest，一个是用于请求JSON数据，一个是用于请求JSON数组，用法和StringRequest类似。
+<pre>
+JsonObjectRequest jsonObjectRequest = new JsonObjectRequest("www.autoref.cn", null,  
+        new Response.Listener<JSONObject>() {  
+            @Override  
+            public void onResponse(JSONObject response) {  
+                Log.d("TAG", response.toString());  
+            }  
+        }, new Response.ErrorListener() {  
+            @Override  
+            public void onErrorResponse(VolleyError error) {  
+                Log.e("TAG", error.getMessage(), error);  
+            }  
+        }); 
+requestQueue.add(jsonObjectRequest);  
+</pre>
+&nbsp;
+ImageRequest：图片请求
+<pre>
+    /**
+     *
+     * @param url
+     *            图片地址
+     * @param listener
+     *            回调，返回一个Bitmap
+     * @param maxWidth
+     *            允许图片最大的宽度，网络图片的宽度大于最大值，会对图片进行压缩，0表示不压缩
+     * @param maxHeight
+     *            允许图片最大的高度，网络图片的高度大于最大值，会对图片进行压缩，0表示不压缩
+     * @param scaleType
+     *            图片伸缩方式，不传默认为ScaleType.CENTER_INSIDE
+     * @param decodeConfig
+     *            图片的颜色属性
+     * @param errorListener
+     *            错误回调
+     */
+
+ImageRequest imageRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                imageView.setImageBitmap(bitmap);
+            }
+        }, 60, 60, scaleType, Bitmap.Config.ARGB_8888, null);
+</pre>
+ImageLoader：也用于加载网络图片，内部是使用ImageRequest来实现的，不过ImageLoader不仅可以对图片进行缓存，还可以过滤掉重复的链接，避免重复发送请求。
+<pre>
+/**
+  *
+  * @param requestQueue
+  *            RequestQueue对象
+  * @param imageCache
+  *            作为一级缓存
+  */
+ImageLoader imageLoader = new ImageLoader(requestQueue, new ImageLoader.ImageCache() {
+            @Override
+            public void putBitmap(String url, Bitmap bitmap) {
+            }
+
+            @Override
+            public Bitmap getBitmap(String url) {
+                return null;
+            }
+        });
+
+/**
+ * 获取到一个ImageListener对象
+ *
+ * @param imageView
+ * @param defaultImageResId
+ *            默认图片，0为不设置
+ * @param errorImageResId
+ *            请求错误时的图片，0为不设置
+ */
+ImageLoader.ImageListener listener = ImageLoader.getImageListener(imageView,
+                R.drawable.default_image, R.drawable.failure_image);
+
+// 获取图片
+imageLoader.get("www.autoref.cn/xxx.jpg", listener);
+// 获取图片时也可以指定图片允许的最大宽度和高度
+imageLoader.get("www.autoref.cn/xxx.jpg", listener, 200, 200);
+</pre>
+上面创建的ImageCache对象是一个空的实现，现在我们借助Android提供的LruCache功能，来写一个简单的ImageCache，实现图片的缓存。
+<pre>
+public class BitmapCache implements ImageCache {  
+
+    private LruCache<String, Bitmap> mCache;  
+
+    public BitmapCache() {  
+        // 将缓存图片的大小设置为5M
+        int maxSize = 5 * 1024 * 1024;  
+        mCache = new LruCache<String, Bitmap>(maxSize) {  
+            @Override  
+            protected int sizeOf(String key, Bitmap bitmap) {  
+                return bitmap.getRowBytes() * bitmap.getHeight();  
+            }  
+        };  
+    }  
+
+    @Override  
+    public Bitmap getBitmap(String url) {  
+        return mCache.get(url);  
+    }  
+
+    @Override  
+    public void putBitmap(String url, Bitmap bitmap) {  
+        mCache.put(url, bitmap);  
+    }  
+
+}  
+</pre>
+&nbsp;
+NetworkImageView：NetworkImageView继承自ImageView，在原生的基础之上加入了加载网络图片的功能。NetworkImageView在被从父控件detach的时候，会自动取消网络请求，还会根据图片设置的width和heigh自动压缩该图片。
+布局XML文件：
+<pre>
+<com.android.volley.toolbox.NetworkImageView  
+    android:id="@+id/network_image_view"  
+    android:layout_width="100dp"  
+    android:layout_height="100dp" />  
+</pre>
+代码实现：
+<pre>
+ImageLoader imageLoader = new ImageLoader(requestQueue, new BitmapCache());
+NetworkImageView networkImageView = (NetworkImageView) findViewById(R.id.network_image_view); 
+networkImageView.setDefaultImageResId(R.drawable.default_image);  
+networkImageView.setErrorImageResId(R.drawable.failure_image);  
+networkImageView.setImageUrl("www.autoref.cn/xxx.jpg", imageLoader);  
+</pre>
+&nbsp;
+最后来说说如何取消请求，我们可以给某个请求设置一个标签：
+<pre>
+request.setTag("Request_Tag");
+</pre>
+然后在需要的地方取消所有指定标签的请求：
+<pre>
+request.cancelAll("Request_Tag"); 
+</pre>

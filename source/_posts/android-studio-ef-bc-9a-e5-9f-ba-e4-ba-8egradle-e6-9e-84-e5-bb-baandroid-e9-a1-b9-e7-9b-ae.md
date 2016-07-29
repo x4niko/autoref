@@ -1,0 +1,145 @@
+---
+title: Android Studio：基于Gradle构建Android项目
+tags:
+  - android studio
+  - gradle
+id: 194
+categories:
+  - android
+  - android studio
+date: 2016-01-10 17:23:34
+---
+
+Gradle跟Ant/Maven一样，是一种依赖管理/自动化构建工具。跟Ant/Maven使用xml语言不一样，Gradle是基于Groovy的内部领域特定（DSL）语言，更简洁、灵活，并完全兼容Maven和ivy。
+Android Studio中的项目通常至少包含两个build.gradle文件，一个是Project范围的，另一个是Module范围的，一个Project可以有多个Module，每个Module下都会对应一个build.gradle。
+
+以下是一个Project下build.gradle的配置：
+<pre>// Gradle脚本依赖的仓库
+buildscript {
+    // 构建过程依赖的仓库
+    repositories {
+        jcenter()   // 表示依赖从 Bintary’s JCenter Maven 仓库中获取
+    }
+
+    // 构建过程需要依赖的库
+    dependencies {
+        // gradle插件的版本
+        classpath 'com.android.tools.build:gradle:1.5.0'
+    }
+}
+
+// 整个项目依赖的仓库
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+// 删除编译目录
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+</pre>
+可以为repositories设置多个库，Gradle会根据依赖定义的顺序依次在各个库里找。
+&nbsp;
+再来看看一个Module下build.gradle的配置：
+<pre>// 表示使用com.android.application插件，当Module为一个android库时使用com.android.library
+apply plugin: 'com.android.application'
+
+// 配置Android构建过程需要的参数
+android {
+    // 编译的SDK版本
+    compileSdkVersion 21
+    // ADT版本
+    buildToolsVersion "23.0.2"
+
+    // Android项目的默认设置
+    defaultConfig {
+        // 应用程序包名
+        applicationId "com.example.nikovinci.myapplication"
+        // 最低支持Android版本
+        minSdkVersion 15
+        // 目标版本
+        targetSdkVersion 21
+        // 版本号
+        versionCode 1
+        // 版本名称
+        versionName "1.0"
+    }
+
+    // 编译类型，默认有release和debug
+    buildTypes {
+        release {
+            // 是否使用混淆(老版本中为runProguard)
+            minifyEnabled false
+            // 使用的混淆文件，可以使用多个混淆文件，使用了SDK中的proguard-android.txt文件以及当前Module*下的proguard-rules.pro文件
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            // 配置签名
+            signingConfig signingConfigs.release
+        }
+    }
+
+    // 声明编译的java版本
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    // 配置签名
+    signingConfigs {
+        // debug版本的签名配置，通常不用配
+        // debug的默认签名为：signingConfig android.signingCongfigs.debug
+        // 位置为：${Home}\.android\debug.keystore
+        debug {
+        }
+        release {
+            storeFile file("storeFile.jks")
+            storePassword "123456"
+            keyAlias "keyAlias"
+            keyPassword "123456"
+        }
+    }
+}
+
+// 用于配制引用的依赖
+dependencies {
+    // 引用当前Module下libs文件夹中的所有.jar文件。
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    // 单元测试JUnit的依赖（test模式下依赖某一个库，该库不会在正式发布时打包到程序中，和debugCompile类似）
+    testCompile 'junit:junit:4.12'
+    // 引用21.0.3版本的appcompat-v7
+    compile 'com.android.support:appcompat-v7:21.0.3'
+}
+</pre>
+&nbsp;
+Project下的settings.gradle文件：
+<pre>include ':app' //表示当前project下有一个名称为app的module
+</pre>
+如果一个Module不是Project根目录下，可以设置为：
+<pre>include ':app2'
+project(':app2').projectDir = new File('{$Home}/path/app2')
+</pre>
+如果有一个模块app3，并且app模块是依赖app3的，这时候要在app模块的build.gradle中的dependencies结点下配置依赖：
+<pre>compile project(':app3')
+</pre>
+并且在settings.gradle中把app3模块包含进来：
+<pre>include ':app', ':app3'
+</pre>
+&nbsp;
+Project下的gradle.properties文件是一个配置文件，定义一些常量供build.gradle使用，比如配置签名相关信息如keystore位置、密码、keyalias等：
+<pre>
+RELEASE_STOREFILE=storeFile.jks
+RELEASE_STORE_PASSWORD=123456
+RELEASE_KEY_ALIAS=keyAlias
+RELEASE_KEY_PASSWORD=123456
+</pre>
+在模块的build.gradle中直接引用：
+<pre>
+storeFile file(RELEASE_STOREFILE)
+storePassword RELEASE_STORE_PASSWORD
+keyAlias RELEASE_KEY_ALIAS
+keyPassword RELEASE_KEY_PASSWORD
+</pre>
+&nbsp;
+Project下的gradlew和gradlew.bat是linux下的shell脚本和windows下的批处理文件，它们会根据gradle-wrapper.properties文件中的distributionUrl下载对应的gradle版本。

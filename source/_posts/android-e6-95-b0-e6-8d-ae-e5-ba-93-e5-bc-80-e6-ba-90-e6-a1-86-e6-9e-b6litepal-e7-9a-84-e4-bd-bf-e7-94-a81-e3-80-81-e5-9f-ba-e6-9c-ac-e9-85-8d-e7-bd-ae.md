@@ -1,0 +1,84 @@
+---
+title: Android数据库开源框架LitePal的使用1、基本配置
+tags:
+  - android
+  - LitePal
+  - 开源框架
+  - 数据库
+id: 224
+categories:
+  - android
+  - android应用开发
+date: 2016-01-14 00:23:05
+---
+
+LitePal是一个开源Android库，使开发者可以在不写一句SQL语句下，很简单的使用SQLite数据库，而且在项目中集成配置也简单。
+
+先来看看LitePal的几个特点：
+
+*   使用对象关系映射（ORM）模式
+*   几乎零配置
+*   自动维护表，包括创建、修改、删除
+*   封装APIs，避免写SQL语句
+*   令人惊叹的簇查询函数
+*   仍旧可以选择使用SQL，但比原始的要简单好用
+*   开源
+&nbsp;
+1、[点击下载](https://github.com/LitePalFramework/LitePal/raw/master/downloads/litepal-1.3.0.jar)并引入jar包
+Eclipse项目：将jar包导入libs文件夹
+Android Studio项目：直接配置build.gradle文件
+<pre>dependencies {
+    compile 'org.litepal.android:core:1.3.0'
+}
+</pre>
+&nbsp;
+2、配置litepal.xml文件
+在项目的assets文件夹中创建litepal.xml文件：
+<pre>
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <dbname value="demo" ></dbname>
+
+    <version value="1" ></version>
+
+    <list>
+    </list>
+</litepal>
+</pre>
+这是唯一的文件：
+
+*   dbname 配置项目的数据库名字。名字后面如果没有写.db，LitePal会自动添加。
+
+*   version 配置数据库版本号。每次更新数据库后，版本号加1。
+
+*   list 配置映射类。包名+类名，如&lt;mapping class="cn.autoref.UserInfo"&gt;&lt;/mapping&gt;
+&nbsp;
+3、配置LitePalApplication
+LitePal需要在AndroidManifest.xml中配置一下LitePalApplication：
+<pre>
+<manifest>
+    <application
+        android:name="org.litepal.LitePalApplication"
+        ...
+    >
+    ...
+    </application>
+</manifest>
+</pre>
+如果有自己的MyApplication，并在上面配置过了。只需要让MyApplication继承LitePalApplication类：
+<pre>public class MyApplication extends LitePalApplication {  
+    ...  
+}  
+</pre>
+另一种情况是，MyApplication继承另外一个AnotherApplication，并且这个AnotherApplication还是在jar包当中，不能修改它的源码的，我们可以调用LitePalApplication.initialize(context)方法代替继承：
+<pre>public class MyOwnApplication extends AnotherApplication {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LitePalApplication.initialize(this);
+    }
+    ...
+}
+</pre>
+LitePalApplication.initialize(context)中的context，要用application级别的，不能使用activity或者service的实例，否则可能会造成内存泄露。

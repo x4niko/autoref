@@ -1,0 +1,24 @@
+---
+title: 配置使用Charles监控android网络请求
+tags:
+  - android
+  - Charles
+  - 网络监控
+id: 264
+categories:
+  - android
+  - android应用开发
+date: 2016-01-25 14:45:39
+---
+
+1、从官网下载并安装软件，有30天的试用期:
+
+[http://www.charlesproxy.com/](http://www.charlesproxy.com/)
+
+2、注意电脑和手机必须在同一网段
+
+3、在Charles界面选择菜单Proxy-&gt;Proxy Settings，并勾选"Enable transparent HTTP proxying"，确定代理端口，默认"8888"就可以了
+
+4、Android手机选择当前连接的WIFI网络，选择"修改网络"，勾选"显示高级选项"，填入代理主机的IP(也就是装了Charles的机器)，端口输入刚才填的"8888"
+
+5、这时Charles客户端会跳一个框，点选允许

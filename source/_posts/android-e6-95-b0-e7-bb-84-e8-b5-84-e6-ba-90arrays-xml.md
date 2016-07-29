@@ -1,0 +1,36 @@
+---
+title: android数组资源arrays.xml
+tags:
+  - android
+  - arrays
+  - xml
+id: 217
+categories:
+  - android
+  - android应用开发
+date: 2016-01-13 12:29:57
+---
+
+在values目录下创建arrays.xml文件，&lt;string-array&gt;定义字符数组，&lt;integer-array&gt;定义整数数组：
+<pre>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="string_values">
+        <item>Alice</item>
+        <item>Bob</item>
+        <item>Carmon</item>
+        <item>David</item>
+        <item>Eva</item>
+    </string-array>
+
+    <integer-array name="integer_values" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </integer-array>
+</resources>
+</pre>
+代码引用数组资源：
+<pre>String[] stringValues = getResources().getStringArray(R.array.string_values);
+Int[] integerValues = getResources().getIntArray(R.array.integer_values);
+</pre>
