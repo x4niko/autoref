@@ -1,0 +1,21 @@
+---
+title: java.lang.IllegalStateException：get field slot from row 0 col 0 failed
+tags:
+  - android error
+  - BUG
+categories:
+  - android
+  - android error
+date: 2016-01-05 21:32:39
+---
+
+错误日志：
+``` bash
+java.lang.IllegalStateException: get field slot from row 0 col 0 failed
+```
+错误原因：当数据库查询结果大于1M的时候，会报这个错误。
+解决办法：查询的时候限制结果列，不要查出所有的列，只查询自己需要的。
+``` bash
+String name = "autoref.cn";  
+Cursor c = db.query("table", new String[]{name, age}, "name"+"=?", new String[]{name}, null, null, null);
+```

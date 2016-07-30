@@ -1,0 +1,18 @@
+---
+title: emulator：ERROR：the user data image is used by another emulator.aborting
+tags:
+  - android error
+  - BUG
+categories:
+  - android
+  - android error
+date: 2016-02-01 21:32:39
+---
+
+错误日志：
+``` bash
+emulator：ERROR：the user data image is used by another emulator.aborting
+```
+错误原因：~\.android\avd\对应设备下的.lock是加锁的，如果程序崩溃等原因导致无法清除这些以.lock结尾的文件夹，导致AVD的锁没有被释放，AVD Manager会认为AVD正在使用当中。
+
+解决办法：删除~\.android\avd\对应设备下的以.lock结尾的文件夹。
