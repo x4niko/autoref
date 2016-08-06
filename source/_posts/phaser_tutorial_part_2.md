@@ -1,0 +1,101 @@
+---
+title: Phaser从入门到出家2：屏幕适配策略
+tags:
+  - HTML5
+  - Phaser
+  - 游戏开发
+categories:
+  - HTML5
+  - Phaser
+date: 2016-08-06 22:14:33
+---
+
+先来了解一下创建Game对象时设置宽高的方式：
+固定模式
+在Phaser的Game构造函数中用像素值来定义游戏的长宽，例如下面的代码就是设置游戏的大小为640 x 480像素:
+``` bash
+var game = new Phaser.Game(640, 480, Phaser.AUTO, 'container');
+```
+
+百分比模式
+也可以使用百分比来定义游戏画布的大小：
+``` bash
+var game = new Phaser.Game('100%', '100%', Phaser.AUTO, 'container');
+```
+在这里游戏画布的大小被设置成container元素可用的宽和高，但是改变浏览器窗口大小时，游戏窗口不会自动跟随改变
+
+游戏世界
+上面Game的大小是我们能看到的大小，有个更大的概念叫游戏世界，默认大小是我们定义的Game的大小，游戏世界大小是可以改变的，通过Phaser的camera可以查看到游戏世界的一部分。这比如一张世界地图是一个游戏世界，拿手电筒垂直照地图，灯光落下的范围就是我们Game的大小。可以通过下面的代码改变其大小：
+``` bash
+game.world.resize(2000, 2000);
+```
+执行上述代码，游戏世界的大小会被重设成2000x2000像素。如果我们设置的游戏初始值是640x480像素的话，那么我们看到的将是整个游戏世界的左上角。通过改变camera.x 和camera.y移动查看游戏世界其他位置，游戏对象可以在这个世界2000x2000像素区域的任何位置，当camera移动到它们的位置或者它们移动到camera的时候，才会被绘制。
+注意：游戏世界是一个虚拟尺寸，和实际的游戏现实大小无关。
+
+父容器
+``` bash
+var game = new Phaser.Game(640, 480, Phaser.AUTO, 'container');
+```
+如上代码，游戏开始时会在container容器里创建一个Canvas DOM元素，这个Canvas的大小是640x480像素，任何CSS设置都可通过container控制布局，例如：设置container的宽500px，并且overflow：none，那么我们就不能看到游戏右面的140px，这部分被切除了，同样如果没有对container设置CSS，container就会自动适配Canvas大小。
+如果container不存在，或为空，Phaser会选择浏览器的窗口（body元素）作为父容器，创建Canvas元素，并添加到body里，如果当前页面已有内容，那么Canvas将会添加到这些内容的后面。
+
+设置Phaser适配模式
+可以在游戏代码任何位置设置游戏的适配模式，但建议只做一次设置，之后不再改变。缩放操作都是直接由ScaleManager来管理，如果有一个全局变量game，可以通过game.scale来操作。
+
+缩放模式一： EXACT_FIT
+``` bash
+game.scale.scaleMode = Phaser.ScaleManager.EXACT_FIT;
+```
+EXACT_FIT缩放模式是一个特殊的模式，它将游戏的大小重设成适合父容器的大小，而且并不会保持游戏的宽高比例，也就是意味着当父容器的大小和游戏的不一样时，游戏将会随之缩放，就像下图：
+![EXACT_FIT](https://raw.githubusercontent.com/x4niko/PhaserSample/master/snapshot/EXACT_FIT.png)
+可以看到，当浏览器又宽又短时图像是很扭曲的。
+
+缩放模式二： NO_SCALE
+``` bash
+game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
+```
+这是默认的适配模式，游戏大小就是在Game构造函数定义的大小，不会有任何改变。它和EXACT_FIT不同的地方在于不管父容器如何改变，都不会扭曲游戏图像。
+![NO_SCALE](https://raw.githubusercontent.com/x4niko/PhaserSample/master/snapshot/NO_SCALE.png)
+注意：可以通过CSS来改变Canvas大小，但在Phaser缩放模式下是不起作用的。
+
+缩放模式三： SHOW_ALL
+``` bash
+game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+```
+这种模式通过调整游戏大小，以适应父元素的大小，但会保持游戏的宽高比例，不会扭曲游戏画面。它通过计算游戏的宽高比,然后再依据父元素的的大小调整Canvas尺寸，与此同时自动保持自身的宽高比。
+像这种以父元素大小为依据，有时会导致出现被称为“边框化”的效果：
+![SHOW_ALL](https://raw.githubusercontent.com/x4niko/PhaserSample/master/snapshot/SHOW_ALL.png)
+
+缩放模式四： RESIZE
+``` bash
+game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+```
+RESIZE模式是创建一个和其父元素同样大小的Canvas元素，如果父元素是1280x720，那么游戏大小也是1280x720像素.在这个适配模式下，Phaser引擎一直会跟踪父元素的大小变化，如果父元素大小发生变化，那游戏大小就会跟着变化。它和SHOW_ALL模式的不同在于RESIZE的canvas元素缩放并非真正的缩放去适配父元素，而是1:1的去匹配显示，它只是基于父元素在其或大或小的区域绘制。
+RESIZE模式还有个一额外的功能是其他模式没有的，如果游戏State有一个resize方法时，无论何时父元素大小发生变化时这个方法都会被调用，同时会传入两个参数：’width‘ 和 ’height‘，可以通过这两个参数去调整游戏对象的位置。
+``` bash
+function resize(width, height) {
+    player.y = height;
+    player.x = width;
+}
+```
+
+缩放模式五： USER_SCALE
+``` bash
+game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+```
+USER_SCALE允许自定义动态缩放，与setUserScale方法组合使用：
+``` bash
+game.scale.setUserScale(hScale, vScale, hTrim, vTrim);
+```
+参数hScale和vScale控制如何缩放游戏，1代表不缩放，0.5代表缩小一半，2代表放大2倍，以此类推。
+参数hTrim和vTrim，必须是整数，用来定义缩放后从画布的水平或垂直尺寸删除的值。
+它的计算方式如下：
+``` bash
+canvas.width = (game.width * hScale) - hTrim
+canvas.height = (game.height * vScale) - vTrim
+```
+可以在游戏任何位置调用setUserScale方法，但通常会在resize时回调，这有两个选择，一个是setResizeCallback方法，另一个是onSizeChange监听：
+``` bash
+game.scale.setResizeCallback(callback, context);
+game.scale.onSizeChange.add(callback, context);
+```

@@ -1,5 +1,5 @@
 ---
-title: Phaser从入门到出家1、创建游戏世界
+title: Phaser从入门到出家1：创建游戏世界
 tags:
   - HTML5
   - Phaser
