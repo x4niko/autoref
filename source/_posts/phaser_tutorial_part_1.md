@@ -1,0 +1,128 @@
+---
+title: Phaser从入门到出家1、创建游戏世界
+tags:
+  - HTML5
+  - Phaser
+  - 游戏开发
+categories:
+  - HTML5
+  - Phaser
+date: 2016-08-05 23:32:39
+---
+
+先上一段比较官方一点的说明：
+Phaser是一款专门用于桌面及移动HTML5 2D游戏开发的开源免费框架，提供JavaScript和TypeScript双重支持，内置游戏对象的物理属性，采用Pixi.js引擎以加快Canvas和WebGL渲染，基于浏览器支持可自由切换。
+除了IE 9+、Firefox、Chrome、Safari及Opera等桌面浏览器之外，Phaser还支持Mobile Chrome（Android 2.2+）及Mobile Safari（iOS 5+）等移动浏览器。
+
+好了，开始创造世界！根据需要先去 [Phaser官网](http://phaser.io/download/stable) 下载"js"或者"min.js"库，"min.js"顾名思义就是精简版的，但是能够满足大多的开发需求。
+
+自建个项目，参考目录结构如下，结构不固定，可以自主组织，引入文件时需注意路径。
+｜－－assets
+｜   ｜－－lufy.png
+｜－－js
+｜   ｜－－phaser.min.js
+｜－－index.html
+
+在index.html中引入phaser.min.js库：
+``` bash
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Phaser从入门到出家 - autoref.cn</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+</head>
+<body>
+
+</body>
+</html>
+```
+
+这样就可以使用Phaser的API了，在body标签中添加如下代码：
+``` bash
+<script type="text/javascript">
+  var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+  function preload() {
+    // 预加载资源
+  }
+
+  function create() {
+    // 创建游戏元素
+  }
+
+  function update() {
+    // 更新游戏
+  }
+</script>
+```
+第二行创建了一个Phaser.Game对象的实例。
+前两个参数是要创建的canvas元素的宽高，这里是800 x 600像素。
+第三个参数是渲染的方式，有Phaser.CANVAS，Phaser.WEBGL和Phaser.AUTO三种，推荐使用Phaser.AUTO，因为它会先尝试使用WebGL渲染，如果浏览器或设备不支持会自动转换成Canvas渲染。
+第四个参数是所创建的canvas元素要嵌入的DOM元素的id，如果设置为“”，canvas元素会被附加到body上。
+最后一个参数是可选的，包含了三个基本函数，见代码注释。
+
+按照惯例应该在画布上添加"Hello Phaser!"字样的，来，我们添加文字“Welcome to autoref.cn!”：
+``` bash
+function create() {
+    var style = { font: "50px '微软雅黑'", fill: "#fff", align: "center" };
+    var text = game.add.text(200, 150, "Welcome to autoref.cn!", style);
+}
+```
+game.add.text() 用来创建文本(Text)对象，有五个参数：
+· x 在画布中的x位置。
+· y 在画布中的y位置。
+· text 被绘制到画布上的文本。
+· style 样式属性，比如：字体、字体大小、字体颜色等等
+· group Phaser.Group (可选)添加对象到指定组，如果没有指定，它将被添加到世界组。
+世界包含了所有的游戏对象，没有固定的尺寸，在所有方向无限延伸，(0,0)坐标是它的中心。Phaser把(0,0)放置在游戏的左上角，但是通过内建的摄像机可以根据需求进行移动。
+
+再添加一张图片，通过在 preload()函数里调用game.load来预加载游戏需要的资源。
+``` bash
+function preload() {
+    game.load.image('lufy', 'assets/lufy.png');
+}
+```
+第一个参数为资源的键，这个字符串是已加载资源的链接，当创建图形时会用到。
+
+下面在 create()函数里添加一张路飞的图到游戏界面，坐标为左上角(0, 0)：
+``` bash
+function create() {
+    var style = { font: "50px '微软雅黑'", fill: "#fff", align: "center" };
+    var text = game.add.text(200, 150, "Welcome to autoref.cn!", style);
+
+    game.add.sprite(0, 0, 'lufy');
+}
+```
+game.add.sprite()创建一个新的Phaser.Sprite对象然后把它添加到游戏世界，第三个参数就是上面提到资源的键。
+
+上帝说要让路飞跑起来，呕心沥血又屁颠屁颠的去做了一组路飞的图（论猿人制图的重要性），最后的图是这样的：
+![running_png](https://raw.githubusercontent.com/x4niko/PhaserSample/master/assets/running.png)
+莫名的成就感。。怎么用呢，代码说话：
+``` bash
+function preload() {
+    game.load.image('lufy', 'assets/lufy.png');
+    game.load.spritesheet('running', 'assets/running.png', 52, 54);
+}
+
+function create() {
+    var style = { font: "50px '微软雅黑'", fill: "#fff", align: "center" };
+    var text = game.add.text(200, 150, "Welcome to autoref.cn!", style);
+
+    game.add.sprite(0, 0, 'lufy');
+
+    player = game.add.sprite(50, game.world.height - 150, 'running');
+    player.animations.add('RunAnimation', [0,1,2,3,4,5,6,7], 10, true);
+    player.animations.play('RunAnimation');
+}
+```
+load.spritesheet() 函数来预加载一张组图，最后两个的参数是组图中单个图像的尺寸。
+使用 animations.add() 函数创建帧动画，需要四个参数：
+· 动画的名称（供以后参考）
+· 包含所有帧的数组
+· 帧速
+· 是否循环动画
+最后使用 animations.play() 来播放动画。
+
+这样，一个基本的游戏世界创建完了，接下来就可以在这基础上为所欲为了。最后上个效果图，当然了，实际上下面那个路飞是会跑的：
+![running_png](https://raw.githubusercontent.com/x4niko/PhaserSample/master/snapshot/72C1013D-83A6-48A9-AF1D-33916391EF35.png)
