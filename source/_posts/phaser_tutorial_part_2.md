@@ -62,7 +62,7 @@ game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
 ``` bash
 game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 ```
-这种模式通过调整游戏大小，以适应父元素的大小，但会保持游戏的宽高比例，不会扭曲游戏画面。它通过计算游戏的宽高比,然后再依据父元素的的大小调整Canvas尺寸，与此同时自动保持自身的宽高比。
+这种模式通过调整游戏大小，以适应父元素的大小，但会保持游戏的宽高比例，不会扭曲游戏画面。它通过计算游戏的宽高比，然后再依据父元素的的大小调整Canvas尺寸，与此同时自动保持自身的宽高比。
 像这种以父元素大小为依据，有时会导致出现被称为“边框化”的效果：
 ![SHOW_ALL](https://raw.githubusercontent.com/x4niko/PhaserSample/master/snapshot/SHOW_ALL.png)
 
