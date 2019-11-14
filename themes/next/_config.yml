@@ -6,7 +6,7 @@
 favicon: /images/avatar.jpg
 
 # Set default keywords (Use a comma to separate)
-keywords: "Hexo, NexT"
+keywords: "Android, iOS, Flutter, Java, Go, Game, Cocos"
 
 # Set rss to false to disable feed link.
 # Leave rss as empty to use site's feed link.
@@ -32,7 +32,7 @@ menu:
   categories: /categories
   archives: /archives
   tags: /tags
-  games: http://game.autoref.cn/
+  #games: http://game.autoref.cn/
   #about: /about
   #commonweal: /404.html
 
@@ -125,6 +125,7 @@ social:
   #LinkLabel: Link
   GitHub: https://github.com/x4niko
   #微博: http://weibo.com/neovinci
+  游戏中心: http://game.autoref.cn/
 
 
 # Social Links Icons
@@ -139,6 +140,7 @@ social_icons:
   GitHub: github
   Twitter: twitter
   Weibo: weibo
+  游戏中心: gamepad
 
 
 # Sidebar Avatar
