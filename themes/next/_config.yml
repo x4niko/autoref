@@ -6,7 +6,7 @@
 favicon: /images/avatar.jpg
 
 # Set default keywords (Use a comma to separate)
-keywords: "Android, iOS, Flutter, Java, Go, Game, Cocos"
+keywords: "Android, Kotlin, iOS, Flutter, Dart, Java, Game, Cocos"
 
 # Set rss to false to disable feed link.
 # Leave rss as empty to use site's feed link.
@@ -123,9 +123,9 @@ font:
 # Value is the target link (E.g. GitHub: https://github.com/iissnan)
 social:
   #LinkLabel: Link
-  GitHub: https://github.com/x4niko
-  #微博: http://weibo.com/neovinci
-  游戏中心: http://game.autoref.cn/
+  # GitHub: https://github.com/x4niko
+  # 微博: http://weibo.com/neovinci
+  # 游戏中心: http://game.autoref.cn/
 
 
 # Social Links Icons
@@ -154,7 +154,7 @@ toc:
   enable: true
 
   # Automatically add list number to toc.
-  number: true
+  number: false
 
 
 # Creative Commons 4.0 International License.
@@ -216,7 +216,7 @@ scroll_to_more: true
 # Automatically Excerpt. Not recommand.
 # Please use <!-- more --> in the post to control excerpt accurately.
 auto_excerpt:
-  enable: false
+  enable: true
   length: 150
 
 

@@ -3,16 +3,16 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: 奥托列夫
-subtitle: 迷之炼码术师
+title: 九品技术贴
+subtitle: 
 description:
-author: Niko Vinci
+author: Niko Yang
 language: zh-Hans
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://autoref.cn
+url: https://jpjst.com
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -71,6 +71,6 @@ deploy:
   type: git
   repo: https://github.com/x4niko/x4niko.github.io.git
   branch: master
-  message: autoref deploy
+  message: jpjst deploy
 
 baidu_analytics: 63c79e1776a1bfa83cb00d24fcebd0df
